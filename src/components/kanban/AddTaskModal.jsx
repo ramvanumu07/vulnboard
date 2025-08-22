@@ -1,7 +1,8 @@
-3// src/components/kanban/AddTaskModal.jsx
-import React, { useState } from 'react';
+// src/components/kanban/AddTaskModal.jsx
+import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import LabelSelector from '../ui/LabelSelector';
+import { sanitizeTaskData } from '../../utils/inputSanitization';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -169,6 +170,20 @@ const CharacterCount = styled.div`
   margin-top: 4px;
 `;
 
+/**
+ * AddTaskModal Component
+ * 
+ * Modal dialog for creating new tasks with comprehensive validation,
+ * accessibility features, and input sanitization.
+ * 
+ * @param {Object} props Component props
+ * @param {boolean} props.isOpen Whether the modal is currently open
+ * @param {Function} props.onClose Callback to close the modal
+ * @param {Function} props.onSubmit Callback to submit the new task
+ * @param {string} props.columnId ID of the column to add the task to
+ * @param {Array} props.availableLabels Array of available label objects
+ * @returns {JSX.Element|null} Rendered modal or null if closed
+ */
 function AddTaskModal({ isOpen, onClose, onSubmit, columnId, availableLabels = [] }) {
   // Default values - no defaults for priority and rating (user must select/enter)
   const getDefaultValues = () => ({
@@ -181,13 +196,17 @@ function AddTaskModal({ isOpen, onClose, onSubmit, columnId, availableLabels = [
   const [formData, setFormData] = useState(getDefaultValues());
   const [errors, setErrors] = useState({});
 
-  const validateForm = () => {
+  // Enhanced form validation with input sanitization
+  const validateForm = useCallback(() => {
     const newErrors = {};
 
+    // Sanitize inputs before validation
+    const sanitizedData = sanitizeTaskData(formData);
+
     // Title validation
-    if (!formData.title.trim()) {
+    if (!sanitizedData.title || sanitizedData.title.trim().length === 0) {
       newErrors.title = 'Task title is required';
-    } else if (formData.title.length > 200) {
+    } else if (sanitizedData.title.length > 200) {
       newErrors.title = 'Title must be 200 characters or less';
     }
 
@@ -207,30 +226,37 @@ function AddTaskModal({ isOpen, onClose, onSubmit, columnId, availableLabels = [
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    return { isValid: Object.keys(newErrors).length === 0, sanitizedData };
+  }, [formData]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = useCallback((e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
+    const { isValid, sanitizedData } = validateForm();
+
+    if (!isValid) {
       return;
     }
 
-    const rating = parseFloat(formData.rating);
-    onSubmit(columnId, {
-      title: formData.title.trim(),
-      priority: formData.priority,
-      rating: Math.min(Math.max(rating, 0), 10),
-      starred: false,
-      labels: formData.labels
-    });
+    try {
+      const rating = parseFloat(formData.rating);
+      onSubmit(columnId, {
+        title: sanitizedData.title,
+        priority: formData.priority,
+        rating: Math.min(Math.max(rating, 0), 10),
+        starred: false,
+        labels: sanitizedData.labels || []
+      });
 
-    // Reset form
-    setFormData(getDefaultValues());
-    setErrors({});
-    onClose();
-  };
+      // Reset form
+      setFormData(getDefaultValues());
+      setErrors({});
+      onClose();
+    } catch (error) {
+      console.error('Error creating task:', error);
+      setErrors({ submit: 'Failed to create task. Please try again.' });
+    }
+  }, [validateForm, formData.rating, formData.priority, columnId, onSubmit, onClose]);
 
   const handleClose = () => {
     // Reset form to default values
@@ -266,11 +292,23 @@ function AddTaskModal({ isOpen, onClose, onSubmit, columnId, availableLabels = [
   if (!isOpen) return null;
 
   return (
-    <ModalOverlay onClick={handleClose}>
+    <ModalOverlay
+      onClick={handleClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="add-task-modal-title"
+      aria-describedby="add-task-modal-description"
+    >
       <ModalContent onClick={(e) => e.stopPropagation()}>
         <ModalHeader>
-          <ModalTitle>Add New Task</ModalTitle>
-          <CloseButton onClick={handleClose}>×</CloseButton>
+          <ModalTitle id="add-task-modal-title">Add New Task</ModalTitle>
+          <CloseButton
+            onClick={handleClose}
+            aria-label="Close add task modal"
+            type="button"
+          >
+            ×
+          </CloseButton>
         </ModalHeader>
 
         <Form onSubmit={handleSubmit}>
@@ -284,9 +322,12 @@ function AddTaskModal({ isOpen, onClose, onSubmit, columnId, availableLabels = [
               placeholder="Enter task title..."
               maxLength={200}
               required
+              aria-describedby={errors.title ? "title-error" : "title-help"}
+              aria-invalid={errors.title ? "true" : "false"}
+              aria-required="true"
             />
             <CharacterCount>{formData.title.length}/200</CharacterCount>
-            {errors.title && <ErrorMessage>{errors.title}</ErrorMessage>}
+            {errors.title && <ErrorMessage id="title-error" role="alert">{errors.title}</ErrorMessage>}
           </FormGroup>
 
           <FormGroup>

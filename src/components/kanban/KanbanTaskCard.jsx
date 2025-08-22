@@ -1,5 +1,5 @@
 // src/components/kanban/KanbanTaskCard.jsx  
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDrag } from 'react-dnd';
 import StarBadgeComponent from '../ui/StarIcon';
@@ -375,6 +375,21 @@ const ContextMenuItem = styled.div`
 
 
 
+/**
+ * KanbanTaskCard Component
+ * 
+ * A highly interactive task card component for the Kanban board with drag-and-drop,
+ * context menus, labels, ratings, and priority indicators.
+ * 
+ * @param {Object} props Component props
+ * @param {Object} props.task Task object containing id, title, priority, rating, labels, etc.
+ * @param {Function} props.onTaskUpdate Callback for updating task properties
+ * @param {Function} props.onTaskDelete Callback for deleting the task
+ * @param {Function} props.onTaskEdit Callback for editing the task
+ * @param {string} props.columnId ID of the column containing this task
+ * @param {Array} props.availableLabels Array of available label objects
+ * @returns {JSX.Element} Rendered task card component
+ */
 function KanbanTaskCard({
   task,
   onTaskUpdate,
@@ -410,23 +425,22 @@ function KanbanTaskCard({
     })
   });
 
-  // Get priority color for rating segments
-  const getPriorityColor = (priority) => {
-    switch (priority) {
+  // Memoized priority color calculation for performance
+  const priorityColor = useMemo(() => {
+    switch (task.priority) {
       case 'Critical': return '#8b1538';
       case 'High': return '#dc2626';
       case 'Medium': return '#f97316';
       case 'Low': return '#eab308';
       default: return '#6b7280';
     }
-  };
+  }, [task.priority]);
 
-  // Generate 12 segments for enhanced rating circle
-  const generateSegments = () => {
+  // Memoized rating segments generation for performance
+  const ratingSegments = useMemo(() => {
     const segments = [];
     const ratingValue = task.rating || 8.8;
     const filledSegments = Math.round((ratingValue / 10) * 12);
-    const priorityColor = getPriorityColor(task.priority);
 
     for (let i = 0; i < 12; i++) {
       const isFilled = i < filledSegments;
@@ -446,10 +460,10 @@ function KanbanTaskCard({
       );
     }
     return segments;
-  };
+  }, [task.rating, priorityColor]);
 
-  // Handle checkbox toggle - show edit/delete options
-  const handleCheckboxClick = (e) => {
+  // Optimized event handlers with useCallback for referential stability
+  const handleCheckboxClick = useCallback((e) => {
     e.stopPropagation();
 
     if (!isChecked) {
@@ -460,10 +474,9 @@ function KanbanTaskCard({
       setIsChecked(false);
       setShowContextMenu(false);
     }
-  };
+  }, [isChecked]);
 
-  // Handle badge click
-  const handleBadgeClick = (e) => {
+  const handleBadgeClick = useCallback((e) => {
     e.stopPropagation();
     const newStarred = !isStarred;
     setIsStarred(newStarred);
@@ -471,45 +484,41 @@ function KanbanTaskCard({
     if (onTaskUpdate) {
       onTaskUpdate(task.id, { starred: newStarred });
     }
-  };
+  }, [isStarred, onTaskUpdate, task.id]);
 
-  // Handle card click - prevent default behavior, editing only via checkbox menu
-  const handleCardClick = (e) => {
+  const handleCardClick = useCallback((e) => {
     e.stopPropagation();
     // Card click no longer opens edit modal - use checkbox menu instead
-  };
+  }, []);
 
-  // Handle right click - show context menu
-  const handleContextMenu = (e) => {
+  const handleContextMenu = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
     setContextMenuPosition({ x: e.clientX, y: e.clientY });
     setShowContextMenu(true);
-  };
+  }, []);
 
-  // Close context menu when clicking outside
-  const handleCloseContextMenu = () => {
+  const handleCloseContextMenu = useCallback(() => {
     setShowContextMenu(false);
-  };
+  }, []);
 
-  // Handle context menu actions
-  const handleEditClick = () => {
+  const handleEditClick = useCallback(() => {
     setShowContextMenu(false);
     setIsChecked(false); // Reset checkbox after action - useEffect will handle class removal
 
     if (onTaskEdit) {
       onTaskEdit(task.id);
     }
-  };
+  }, [onTaskEdit, task.id]);
 
-  const handleDeleteClick = () => {
+  const handleDeleteClick = useCallback(() => {
     setShowContextMenu(false);
     setIsChecked(false); // Reset checkbox after action - useEffect will handle class removal
 
     if (onTaskDelete) {
       onTaskDelete(task.id);
     }
-  };
+  }, [onTaskDelete, task.id]);
 
   // Format timestamp
   const formatTimestamp = (dateString) => {
@@ -627,7 +636,7 @@ function KanbanTaskCard({
             <RatingContainer>
               <CircularRating>
                 <SegmentedCircle>
-                  {generateSegments()}
+                  {ratingSegments}
                 </SegmentedCircle>
               </CircularRating>
               <RatingText>{ratingValue}</RatingText>

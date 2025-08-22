@@ -1,9 +1,9 @@
 {
-  "name": "kanban-app",
+  "name": "vulnboard",
   "version": "1.0.0",
   "private": true,
-  "description": "Production-ready Kanban board for security vulnerabilities (React, Redux Toolkit, React DnD, styled-components).",
-  "author": "Your Name",
+  "description": "Enterprise-grade vulnerability management platform with advanced Kanban workflows for cybersecurity teams",
+  "author": "Senior Frontend Developer",
   "license": "MIT",
   "scripts": {
     "start": "react-scripts start",

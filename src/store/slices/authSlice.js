@@ -2,6 +2,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { persistState, clearUserData, loadPersistedState } from '../../utils/persistState';
 import { resetKanbanState, setKanbanFromLocalStorage } from './kanbanSlice';
+import { sanitizeEmail, sanitizeInput } from '../../utils/inputSanitization';
 
 // Helper function to get registered users from localStorage
 const getRegisteredUsers = () => {
@@ -22,11 +23,32 @@ const saveRegisteredUsers = (users) => {
   }
 };
 
-// Mock authentication - simulate API call
+/**
+ * Login thunk - async action with input sanitization and validation
+ * Authenticates user against registered users and loads their data
+ */
 export const login = createAsyncThunk(
   'auth/login',
   async ({ email, password }, { rejectWithValue, dispatch, getState }) => {
     try {
+      // Sanitize and validate inputs
+      const sanitizedEmail = sanitizeEmail(email);
+      const sanitizedPassword = sanitizeInput(password, {
+        maxLength: 100,
+        allowHTML: false,
+        preserveNewlines: false
+      });
+
+      // Validate email format
+      if (!sanitizedEmail) {
+        return rejectWithValue('Please enter a valid email address');
+      }
+
+      // Validate password
+      if (!sanitizedPassword || sanitizedPassword.length < 1) {
+        return rejectWithValue('Password is required');
+      }
+
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -34,25 +56,25 @@ export const login = createAsyncThunk(
       const registeredUsers = getRegisteredUsers();
 
       // Find user by email
-      const user = registeredUsers.find(u => u.email === email);
+      const user = registeredUsers.find(u => u.email === sanitizedEmail);
 
       if (!user) {
         return rejectWithValue('User not registered. Please sign up first.');
       }
 
-      if (user.password !== password) {
+      if (user.password !== sanitizedPassword) {
         return rejectWithValue('Invalid password');
       }
 
       // Check if switching users and clear previous data if needed
       const currentState = getState();
-      if (currentState.auth.user && currentState.auth.user.email !== email) {
+      if (currentState.auth.user && currentState.auth.user.email !== sanitizedEmail) {
         clearUserData(currentState.auth.user.email);
         dispatch(resetKanbanState());
       }
 
       // Load user's kanban data
-      const { kanban } = loadPersistedState(email);
+      const { kanban } = loadPersistedState(sanitizedEmail);
       if (kanban) {
         dispatch(setKanbanFromLocalStorage(kanban));
       } else {
@@ -63,41 +85,58 @@ export const login = createAsyncThunk(
       // Return user data without password
       return { email: user.email, id: user.id };
     } catch (error) {
-      return rejectWithValue('Login failed');
+      console.error('Login error:', error);
+      return rejectWithValue('Login failed. Please try again.');
     }
   }
 );
 
+/**
+ * Signup thunk - async action with input sanitization and validation
+ * Creates new user account with comprehensive validation
+ */
 export const signup = createAsyncThunk(
   'auth/signup',
   async ({ email, password }, { rejectWithValue }) => {
     try {
+      // Sanitize and validate inputs
+      const sanitizedEmail = sanitizeEmail(email);
+      const sanitizedPassword = sanitizeInput(password, {
+        maxLength: 100,
+        allowHTML: false,
+        preserveNewlines: false
+      });
+
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Validation
-      if (!email || !email.includes('@')) {
+      // Enhanced validation
+      if (!sanitizedEmail) {
         return rejectWithValue('Please enter a valid email address');
       }
 
-      if (!password || password.length < 6) {
+      if (!sanitizedPassword || sanitizedPassword.length < 6) {
         return rejectWithValue('Password must be at least 6 characters long');
+      }
+
+      if (sanitizedPassword.length > 50) {
+        return rejectWithValue('Password must be less than 50 characters');
       }
 
       // Get existing registered users
       const registeredUsers = getRegisteredUsers();
 
       // Check if user already exists
-      const existingUser = registeredUsers.find(u => u.email === email);
+      const existingUser = registeredUsers.find(u => u.email === sanitizedEmail);
       if (existingUser) {
         return rejectWithValue('User already registered. Please login instead.');
       }
 
-      // Create new user
+      // Create new user with sanitized data
       const newUser = {
         id: Date.now(),
-        email,
-        password, // In real app, this should be hashed
+        email: sanitizedEmail,
+        password: sanitizedPassword, // In real app, this should be hashed
         createdAt: new Date().toISOString()
       };
 
@@ -108,7 +147,8 @@ export const signup = createAsyncThunk(
       // Return user data without password
       return { email: newUser.email, id: newUser.id };
     } catch (error) {
-      return rejectWithValue('Signup failed');
+      console.error('Signup error:', error);
+      return rejectWithValue('Signup failed. Please try again.');
     }
   }
 );

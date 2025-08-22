@@ -1,4 +1,5 @@
 // src/hooks/useTaskManagement.js
+import React, { useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   addColumn,
@@ -19,11 +20,30 @@ import {
   removeLabelFromTask
 } from '../store/slices/kanbanSlice';
 import { updateFilter } from '../store/slices/filterSlice';
-import { useMemo } from 'react';
 import { filterTasksByLabel } from '../utils/filterTasksByLabel';
 
 /**
- * Encapsulates all Kanban column & task logic with filtering and sorting.
+ * Custom hook for managing Kanban board operations including tasks, columns, and labels.
+ * Provides optimized filtering, sorting, and CRUD operations with memoization.
+ * 
+ * @returns {Object} Object containing:
+ *   - columns: Array of column objects
+ *   - tasks: Processed tasks object (filtered and sorted)
+ *   - rawTasks: Unprocessed tasks for internal operations
+ *   - labels: Available labels array
+ *   - CRUD operations for columns, tasks, and labels
+ *   - Filter and sort operations
+ *   - Loading and error states
+ * 
+ * @example
+ * const {
+ *   columns,
+ *   tasks,
+ *   addNewTask,
+ *   updateTask,
+ *   removeTask,
+ *   updateFilters
+ * } = useTaskManagement();
  */
 export function useTaskManagement() {
   const dispatch = useDispatch();
@@ -102,10 +122,21 @@ export function useTaskManagement() {
     dispatch(addColumn(newColumn));
   };
 
-  const updateColumn = (id, data) => dispatch(editColumn({ id, data }));
-  const removeColumn = (id) => dispatch(deleteColumn(id));
+  // Column management operations with useCallback for referential stability
+  const updateColumn = useCallback((id, data) => {
+    dispatch(editColumn({ id, data }));
+  }, [dispatch]);
 
-  const addNewTask = (columnId, taskData) => {
+  const removeColumn = useCallback((id) => {
+    dispatch(deleteColumn(id));
+  }, [dispatch]);
+
+  const removeColumnWithTasks = useCallback((columnId) => {
+    dispatch(deleteColumnWithTasks(columnId));
+  }, [dispatch]);
+
+  // Task management operations with useCallback for referential stability
+  const addNewTask = useCallback((columnId, taskData) => {
     const newTask = {
       id: Math.floor(1000 + Math.random() * 9000),
       title: taskData.title || 'New Task',
@@ -121,23 +152,53 @@ export function useTaskManagement() {
       ...taskData
     };
     dispatch(addTask({ columnId, task: newTask }));
-  };
+  }, [dispatch]);
 
-  const updateTask = (taskId, data) => dispatch(editTask({ taskId, data }));
-  const removeTask = (taskId) => dispatch(deleteTask(taskId));
-  const moveTaskToColumn = (taskId, columnId) => dispatch(moveTask({ taskId, columnId }));
-  const moveAllTasksToColumn = (fromColumnId, toColumnId) => dispatch(moveTasksToColumn({ fromColumnId, toColumnId }));
-  const removeColumnWithTasks = (columnId) => dispatch(deleteColumnWithTasks(columnId));
+  const updateTask = useCallback((taskId, data) => {
+    dispatch(editTask({ taskId, data }));
+  }, [dispatch]);
 
-  // Label management functions
-  const addNewLabel = (labelData) => dispatch(addLabel(labelData));
-  const updateLabel = (labelId, labelData) => dispatch(editLabel({ id: labelId, data: labelData }));
-  const removeLabel = (labelId) => dispatch(deleteLabel(labelId));
-  const addTaskLabel = (taskId, labelId) => dispatch(addLabelToTask({ taskId, labelId }));
-  const removeTaskLabel = (taskId, labelId) => dispatch(removeLabelFromTask({ taskId, labelId }));
+  const removeTask = useCallback((taskId) => {
+    dispatch(deleteTask(taskId));
+  }, [dispatch]);
 
-  const updateFilters = (filterUpdates) => dispatch(updateFilter(filterUpdates));
-  const setSort = (sort) => updateFilters({ sort });
+  const moveTaskToColumn = useCallback((taskId, columnId) => {
+    dispatch(moveTask({ taskId, columnId }));
+  }, [dispatch]);
+
+  const moveAllTasksToColumn = useCallback((fromColumnId, toColumnId) => {
+    dispatch(moveTasksToColumn({ fromColumnId, toColumnId }));
+  }, [dispatch]);
+
+  // Label management operations with useCallback for referential stability
+  const addNewLabel = useCallback((labelData) => {
+    dispatch(addLabel(labelData));
+  }, [dispatch]);
+
+  const updateLabel = useCallback((labelId, labelData) => {
+    dispatch(editLabel({ id: labelId, data: labelData }));
+  }, [dispatch]);
+
+  const removeLabel = useCallback((labelId) => {
+    dispatch(deleteLabel(labelId));
+  }, [dispatch]);
+
+  const addTaskLabel = useCallback((taskId, labelId) => {
+    dispatch(addLabelToTask({ taskId, labelId }));
+  }, [dispatch]);
+
+  const removeTaskLabel = useCallback((taskId, labelId) => {
+    dispatch(removeLabelFromTask({ taskId, labelId }));
+  }, [dispatch]);
+
+  // Filter and sort operations with useCallback for referential stability
+  const updateFilters = useCallback((filterUpdates) => {
+    dispatch(updateFilter(filterUpdates));
+  }, [dispatch]);
+
+  const setSort = useCallback((sort) => {
+    updateFilters({ sort });
+  }, [updateFilters]);
 
   return {
     columns: kanban.columns,
