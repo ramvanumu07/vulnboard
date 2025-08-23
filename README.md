@@ -34,6 +34,226 @@ A high-performance, enterprise-grade Kanban board application specifically desig
 - **Keyboard Navigation**: Full accessibility compliance for enterprise environments
 - **High Performance**: Sub-second load times for critical security operations
 
+## Complete User Guide
+
+### Getting Started
+
+#### 1. Authentication
+- **Sign Up**: Create a new account with email and secure password
+- **Login**: Access your personalized vulnerability dashboard
+- **Session Management**: Automatic session handling with secure logout
+
+#### 2. Dashboard Overview
+Upon login, you'll see the main Kanban board with:
+- **Header Controls**: Filtering, sorting, and view options
+- **Categories**: Vertical columns representing workflow stages
+- **Tasks**: Individual vulnerability cards within categories
+- **Add Controls**: Buttons to create new categories and tasks
+
+### Core Functionality Guide
+
+#### Managing Categories (Columns)
+
+##### Creating Categories
+1. Click the **"Add Category"** button (appears after existing categories)
+2. Enter category name (e.g., "New Vulnerabilities", "In Progress", "Resolved")
+3. Click **"Create Category"** to add to your board
+
+##### Deleting Categories
+1. Click the **three-dot menu (⋮)** in the category header
+2. Select **"Delete Category"**
+3. Confirm deletion in the popup dialog
+4. **Note**: All tasks within the category will be permanently deleted
+
+#### Managing Tasks (Vulnerability Cards)
+
+##### Creating New Tasks
+1. Click the **"+ Add Task"** button within any category
+2. Fill in the required fields:
+   - **Title**: Brief description of the vulnerability *(Required)*
+   - **Priority**: Select from Critical/High/Medium/Low *(Required)*
+   - **Rating**: CVSS score from 0-10 *(Required)*
+   - **Labels**: Optional tags for categorization
+3. Click **"Create Task"** (only enabled when all required fields are filled)
+
+##### Editing Tasks
+1. **Hover** over any task card to reveal the checkbox
+2. **Click the checkbox** beside the task ID
+3. Select **"Edit"** from the context menu
+4. Modify any field in the edit modal:
+   - Title, Priority, Rating, Labels
+5. Click **"Save Changes"** to update
+
+##### Deleting Tasks
+1. **Hover** over the task card to reveal the checkbox
+2. **Click the checkbox** beside the task ID
+3. Select **"Delete"** from the context menu
+4. Confirm deletion in the popup dialog
+
+##### Moving Tasks Between Categories
+**Drag & Drop Method:**
+1. Click and hold any task card
+2. Drag to the desired category
+3. Release to drop the task in the new category
+
+#### Working with Labels
+
+##### Managing Labels
+1. Click **"Manage Labels"** in the header
+2. **Create New Labels**:
+   - Enter label name
+   - Choose color from the palette
+   - Click "Add Label"
+3. **Edit Existing Labels**:
+   - Click the edit icon next to any label
+   - Modify name or color
+   - Save changes
+4. **Delete Labels**:
+   - Click the delete icon next to any label
+   - Confirm deletion
+
+##### Applying Labels to Tasks
+1. When creating or editing a task, use the **Labels** section
+2. Click on available labels to toggle them on/off
+3. Selected labels appear as colored badges on the task card
+4. **Smart Display**: If multiple labels are applied, the card shows the first label with "..." indicating more
+
+##### Viewing All Task Labels
+- Click on the **labels badge** on any task card
+- A tooltip displays all applied labels
+- Useful for tasks with multiple classifications
+
+#### Advanced Filtering & Sorting
+
+##### Filtering Options
+**Sort By**: Arrange tasks by various criteria
+- Priority (High to Low / Low to High)
+- Rating (High to Low / Low to High)
+- Created Date (Newest / Oldest)
+- Title (A-Z / Z-A)
+
+**Filter Labels**: Show only tasks with specific labels
+- Click "Filter Labels" button
+- Check/uncheck labels to filter
+- Clear all to show all tasks
+
+##### Using Filters Effectively
+1. **Combine Filters**: Use multiple filters simultaneously for precise results
+2. **Clear Filters**: Click filter buttons again to remove active filters
+3. **Mobile Access**: Use "Others" dropdown menu for additional filter options
+
+#### View Modes
+
+##### Board View (Default)
+- **Layout**: Categories displayed horizontally, tasks vertically within each
+- **Best For**: Visual workflow management, drag-and-drop operations
+- **Features**: Full drag-and-drop, visual priority indicators
+
+##### List View
+- **Layout**: Categories stacked vertically, tasks listed within each category
+- **Best For**: Detailed task review, mobile devices, text-heavy workflows
+- **Access**: Click the view toggle in the header
+- **Features**: Same functionality as Board view (add, edit, delete, drag-and-drop)
+
+### Advanced Features
+
+#### Keyboard Navigation
+- **Tab**: Navigate between interactive elements
+- **Enter/Space**: Activate buttons and controls
+- **Escape**: Close modals and dropdowns
+- **Arrow Keys**: Navigate within dropdowns and menus
+
+#### Mobile Optimization
+- **Touch Gestures**: Tap to select, long-press for context menus
+- **Responsive Layout**: Optimized interface for all screen sizes
+- **Mobile Filters**: Consolidated filter menu for easier access
+- **Touch Targets**: All interactive elements sized for touch interaction
+
+#### Data Persistence
+- **Auto-Save**: All changes automatically saved to browser storage
+- **Session Recovery**: Data persists across browser sessions
+- **Backup**: Regular automatic backups of your vulnerability data
+
+### Best Practices
+
+#### Workflow Organization
+1. **Create Meaningful Categories**: Use clear, action-oriented names
+   - ✅ "New Vulnerabilities", "Under Investigation", "Awaiting Patch"
+   - ❌ "Column 1", "Stuff", "Things"
+
+2. **Use Priority Levels Consistently**:
+   - **Critical**: Immediate action required, system compromise possible
+   - **High**: Significant risk, address within 24-48 hours
+   - **Medium**: Moderate risk, address within 1 week
+   - **Low**: Minor risk, address during next maintenance window
+
+3. **Leverage Labels Effectively**:
+   - Use consistent naming conventions
+   - Color-code by vulnerability type or system
+   - Create labels for: vulnerability types, affected systems, remediation status
+
+4. **Maintain Clean Categories**:
+   - Regularly review and clean up completed tasks
+   - Archive or delete resolved vulnerabilities
+   - Keep active categories focused and manageable
+
+#### Security Considerations
+- **Regular Reviews**: Periodically review all vulnerability tasks
+- **Priority Updates**: Adjust priorities as threat landscape changes
+- **Documentation**: Use task titles and labels for clear documentation
+- **Compliance**: Maintain audit trail through task history
+
+### Troubleshooting
+
+#### Common Issues
+
+**Tasks Not Saving**:
+- Ensure all required fields are filled
+- Check browser console for errors
+- Try refreshing the page
+
+**Drag & Drop Not Working**:
+- Ensure you're clicking and holding the task card
+- Try using the edit method to move tasks between categories
+- Check if browser supports drag and drop
+
+**Filters Not Working**:
+- Clear browser cache and reload
+- Ensure you're clicking the correct filter buttons
+- Try resetting all filters and applying one at a time
+
+**Mobile Interface Issues**:
+- Use the "Others" menu for additional filters
+- Try rotating device for better layout
+- Ensure touch targets are properly sized
+
+#### Performance Tips
+- **Large Datasets**: Use filters to reduce visible tasks
+- **Browser Performance**: Clear browser cache periodically
+- **Mobile Performance**: Close unused browser tabs
+
+### Mobile Usage Guide
+
+#### Accessing Filters on Mobile
+1. **Primary Filters**: Sort By, Filter Labels, Manage Labels visible as buttons
+2. **Secondary Filters**: Severity, Status, Pentest, Target, Assigned To available in "Others" dropdown
+3. **Quick Access**: Swipe gestures for common actions
+
+#### Mobile-Specific Features
+- **Responsive Cards**: Task cards adapt to screen size
+- **Touch-Friendly**: All interactive elements optimized for touch
+- **Gesture Support**: Swipe and tap gestures throughout interface
+- **Mobile Menu**: Consolidated navigation for smaller screens
+
+### Tips for Maximum Productivity
+
+1. **Start Simple**: Begin with basic categories (To Do, In Progress, Done)
+2. **Iterate**: Refine your workflow based on team needs
+3. **Use Labels**: Implement consistent labeling for better organization
+4. **Regular Maintenance**: Keep your board clean and up-to-date
+5. **Team Consistency**: Establish team conventions for categories and labels
+6. **Backup Strategy**: Regularly export data for backup purposes
+
 ## Technical Architecture
 
 ### Enterprise-Grade Structure
@@ -381,9 +601,9 @@ CMD ["npx", "serve", "-s", "build"]
 4. Update CHANGELOG.md
 5. Request review from maintainers
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
 ## Acknowledgments
 
