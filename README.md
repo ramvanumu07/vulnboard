@@ -2,6 +2,8 @@
 
 A high-performance, enterprise-grade Kanban board application specifically designed for cybersecurity teams to manage vulnerability assessments, penetration testing workflows, and security incident tracking. Built with modern React architecture and optimized for professional security operations.
 
+🔗 **[Live Demo](https://vulnboard.vercel.app/)**
+
 ## Key Features
 
 ### Cybersecurity-Focused Design
